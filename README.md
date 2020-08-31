@@ -1,4 +1,4 @@
-# MOUSEKEYS
+# mousekeys
 ## Usage:
 
 Mousekeys are activate when NumLock is deactivated.
@@ -6,11 +6,11 @@ Mousekeys are activate when NumLock is deactivated.
 * **Numpad2:** Move Down
 * **Numpad4:** Move Left
 * **Numpad6:** Move Right
-* **Ctrl + Movement Keys:** Fast moving
+* **Ctrl + Movement Keys:** Fast 
 * **Numpad5:** Left Click
 * **Numpad-:** Right Click
 * **Numpad+:** Double Left Click
 * **Numpad0:** Hold Left MButton
 * **Numpad.:** Release Left MButton
 * **Numpad/:** Scroll Up
-* **Numpad*:** Scroll Down
+* **Numpad\*:** Scroll Down
