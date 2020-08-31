@@ -6,7 +6,7 @@ Mousekeys are activate when NumLock is deactivated.
 * **Numpad2:** Move Down
 * **Numpad4:** Move Left
 * **Numpad6:** Move Right
-* **Ctrl + Movement Keys:** Fast moving speed
+* **Ctrl + Movement Keys:** Fast moving
 * **Numpad5:** Left Click
 * **Numpad-:** Right Click
 * **Numpad+:** Double Left Click
