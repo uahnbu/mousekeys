@@ -8,236 +8,188 @@ lastVertical := 0
 ^NumpadClear::Click
 ^NumpadIns::Click Down
 ^NumpadDel::Click Up
-NumpadClear::Click
-NumpadIns::Click Down
-NumpadDel::Click Up
+*NumpadClear::Click
+*NumpadIns::Click Down
+*NumpadDel::Click Up
 
 #If !GetKeyState("NumLock", "T")
     ^NumpadAdd::Send {LButton}{LButton}
     ^NumpadSub::RButton
     ^NumpadDiv::Click WheelUp
     ^NumpadMult::Click WheelDown
-    NumpadAdd::Send {LButton}{LButton}
-    NumpadSub::RButton
-    NumpadDiv::Click WheelUp
-    NumpadMult::Click WheelDown
+    *NumpadAdd::Send {LButton}{LButton}
+    *NumpadSub::RButton
+    *NumpadDiv::Click WheelUp
+    *NumpadMult::Click WheelDown
 #If
 
 ^NumpadUp::
-NumpadUp::
-    If !pressingUp {
-        pressingUp := True, lastVertical := 1
-        If pressingDown {
-            If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-                SetTimer MoveDownLeft, Delete
-                SetTimer MoveUpLeft, 1
-            } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-                SetTimer MoveDownRight, Delete
-                SetTimer MoveUpRight, 1
-            } Else {
-                SetTimer MoveDown, Delete
-                SetTimer MoveUp, 1
-            }
-        } Else If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-            SetTimer MoveLeft, Delete
-            SetTimer MoveUpLeft, 1
-        } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-            SetTimer MoveRight, Delete
-            SetTimer MoveUpRight, 1
-        } Else
-            SetTimer MoveUp, 1
-    }
+*NumpadUp::
+    PressUp()
 Return
 
 ^NumpadDown::
-NumpadDown::
-    If !pressingDown {
-        pressingDown := True, lastVertical := 2
-        If pressingUp {
-            If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-                SetTimer MoveUpLeft, Delete
-                SetTimer MoveDownLeft, 1
-            } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-                SetTimer MoveUpRight, Delete
-                SetTimer MoveDownRight, 1
-            } Else {
-                SetTimer MoveUp, Delete
-                SetTimer MoveDown, 1
-            }
-        } Else If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-            SetTimer MoveLeft, Delete
-            SetTimer MoveDownLeft, 1
-        } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-            SetTimer MoveRight, Delete
-            SetTimer MoveDownRight, 1
-        } Else
-            SetTimer MoveDown, 1
-    }
+*NumpadDown::
+    PressDown()
 Return
 
 ^NumpadLeft::
-NumpadLeft::
-    If !pressingLeft {
-        pressingLeft := True, lastHorizontal := 1
-        If pressingRight {
-            If pressingUp && (!pressingDown || lastVertical = 1) {
-                SetTimer MoveUpRight, Delete
-                SetTimer MoveUpLeft, 1
-            } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-                SetTimer MoveDownRight, Delete
-                SetTimer MoveDownLeft, 1
-            } Else {
-                SetTimer MoveRight, Delete
-                SetTimer MoveLeft, 1
-            }
-        } Else If pressingUp && (!pressingDown || lastVertical = 1) {
-            SetTimer MoveUp, Delete
-            SetTimer MoveUpLeft, 1
-        } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-            SetTimer MoveDown, Delete
-            SetTimer MoveDownLeft, 1
-        } Else
-            SetTimer MoveLeft, 1
-    }
+*NumpadLeft::
+    PressLeft()
 Return
 
 ^NumpadRight::
-NumpadRight::
-    If !pressingRight {
-        pressingRight := True, lastHorizontal := 2
-        If pressingLeft {
-            If pressingUp && (!pressingDown || lastVertical = 1) {
-                SetTimer MoveUpLeft, Delete
-                SetTimer MoveUpRight, 1
-            } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-                SetTimer MoveDownLeft, Delete
-                SetTimer MoveDownRight, 1
-            } Else {
-                SetTimer MoveLeft, Delete
-                SetTimer MoveRight, 1
-            }
-        } Else If pressingUp && (!pressingDown || lastVertical = 1) {
-            SetTimer MoveUp, Delete
-            SetTimer MoveUpRight, 1
-        } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-            SetTimer MoveDown, Delete
-            SetTimer MoveDownRight, 1
-        } Else
-            SetTimer MoveRight, 1
-    }
+*NumpadRight::
+    PressRight()
+Return
+
+^NumpadHome::
+*NumpadHome::
+    PressUp()
+    PressLeft()
+Return
+
+^NumpadEnd::
+*NumpadEnd::
+    PressDown()
+    PressLeft()
+Return
+
+^NumpadPgUp::
+*NumpadPgUp::
+    PressUp()
+    PressRight()
+Return
+
+^NumpadPgDn::
+*NumpadPgDn::
+    PressDown()
+    PressRight()
 Return
 
 ^NumpadUp UP::
 NumpadUp UP::
-    pressingUp := False
-    If (pressingDown) {
-        lastVertical := 2
-        If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-            SetTimer MoveUpLeft, Delete
-            SetTimer MoveDownLeft, 1
-        } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-            SetTimer MoveUpRight, Delete
-            SetTimer MoveDownRight, 1
-        } Else {
-            SetTimer MoveUp, Delete
-            SetTimer MoveDown, 1
-        }
-    } Else {
-        lastVertical := 0
-        If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-            SetTimer MoveUpLeft, Delete
-            SetTimer MoveLeft, 1
-        } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-            SetTimer MoveUpRight, Delete
-            SetTimer MoveRight, 1
-        } Else
-            SetTimer MoveUp, Delete
-    }
+    ReleaseUp()
 Return
 
 ^NumpadDown UP::
 NumpadDown UP::
-    pressingDown := False
-    If (pressingUp) {
-        lastVertical := 1
-        If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-            SetTimer MoveDownLeft, Delete
-            SetTimer MoveUpLeft, 1
-        } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-            SetTimer MoveDownRight, Delete
-            SetTimer MoveUpRight, 1
-        } Else {
-            SetTimer MoveDown, Delete
-            SetTimer MoveUp, 1
-        }
-    } Else {
-        lastVertical := 0
-        If pressingLeft && (!pressingRight || lastHorizontal = 1) {
-            SetTimer MoveDownLeft, Delete
-            SetTimer MoveLeft, 1
-        } Else If pressingRight && (!pressingLeft || lastHorizontal = 2) {
-            SetTimer MoveDownRight, Delete
-            SetTimer MoveRight, 1
-        } Else
-            SetTimer MoveDown, Delete
-    }
+    ReleaseDown()
 Return
 
 ^NumpadLeft UP::
 NumpadLeft UP::
-    pressingLeft := False
-    If (pressingRight) {
-        lastHorizontal := 2
-        If pressingUp && (!pressingDown || lastVertical = 1) {
-            SetTimer MoveUpLeft, Delete
-            SetTimer MoveUpRight, 1
-        } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-            SetTimer MoveDownLeft, Delete
-            SetTimer MoveDownRight, 1
-        } Else {
-            SetTimer MoveLeft, Delete
-            SetTimer MoveRight, 1
-        }
-    } Else {
-        lastHorizontal := 0
-        If pressingUp && (!pressingDown || lastVertical = 1) {
-            SetTimer MoveUpLeft, Delete
-            SetTimer MoveUp, 1
-        } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-            SetTimer MoveDownLeft, Delete
-            SetTimer MoveDown, 1
-        } Else
-            SetTimer MoveLeft, Delete
-    }
+    ReleaseLeft()
 Return
 
 ^NumpadRight UP::
 NumpadRight UP::
-    pressingRight := False
-    If (pressingLeft) {
-        lastHorizontal := 1
-        If pressingUp && (!pressingDown || lastVertical = 1) {
-            SetTimer MoveUpRight, Delete
-            SetTimer MoveUpLeft, 1
-        } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-            SetTimer MoveDownRight, Delete
-            SetTimer MoveDownLeft, 1
-        } Else {
-            SetTimer MoveRight, Delete
-            SetTimer MoveLeft, 1
-        }
-    } Else {
-        lastHorizontal := 0
-        If pressingUp && (!pressingDown || lastVertical = 1) {
-            SetTimer MoveUpRight, Delete
-            SetTimer MoveUp, 1
-        } Else If pressingDown && (!pressingUp || lastVertical = 2) {
-            SetTimer MoveDownRight, Delete
-            SetTimer MoveDown, 1
-        } Else
-            SetTimer MoveRight, Delete
-    }
+    ReleaseRight()
 Return
+
+^NumpadHome UP::
+NumpadHome UP::
+    ReleaseUp()
+    ReleaseLeft()
+Return
+
+^NumpadEnd UP::
+NumpadEnd UP::
+    ReleaseDown()
+    ReleaseLeft()
+Return
+
+^NumpadPgUp UP::
+NumpadPgUp UP::
+    ReleaseUp()
+    ReleaseRight()
+Return
+
+^NumpadPgDn UP::
+NumpadPgDn UP::
+    ReleaseDown()
+    ReleaseRight()
+Return
+
+PressUp() {
+    global
+    If (lastVertical = -1)
+        Return
+    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
+    If (pressingDown || lastHorizontal != 0)
+        SetTimer % "Move" . ["", "Down"][pressingDown + 1] . offDirection, Delete
+    SetTimer % "MoveUp" . offDirection, 1
+    lastVertical := -1, pressingUp := True
+}
+
+PressDown() {
+    global
+    If (lastVertical = 1)
+        Return
+    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
+    If (pressingUp || lastHorizontal != 0)
+        SetTimer % "Move" . ["", "Up"][pressingUp + 1] . offDirection, Delete
+    SetTimer % "MoveDown" . offDirection, 1
+    lastVertical := 1, pressingDown := True
+}
+
+PressLeft() {
+    global
+    If (lastHorizontal = -1)
+        Return
+    offDirection := ["Up", "", "Down"][lastVertical + 2]
+    If (pressingRight || lastVertical != 0)
+        SetTimer % "Move" . offDirection . ["", "Right"][pressingRight + 1], Delete
+    SetTimer % "Move" . offDirection . "Left", 1
+    lastHorizontal := -1, pressingLeft := True
+}
+
+PressRight() {
+    global
+    If (lastHorizontal = 1)
+        Return
+    offDirection := ["Up", "", "Down"][lastVertical + 2]
+    If (pressingLeft || lastVertical != 0)
+        SetTimer % "Move" . offDirection . ["", "Left"][pressingLeft + 1], Delete
+    SetTimer % "Move" . offDirection . "Right", 1
+    lastHorizontal := 1, pressingRight := True
+}
+
+ReleaseUp() {
+    global
+    lastVertical := pressingDown, pressingUp := False
+    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
+    SetTimer % "MoveUp" . offDirection, Delete
+    If (pressingDown || lastHorizontal != 0)
+        SetTimer % "Move" . ["", "Down"][pressingDown + 1] . offDirection, 1
+}
+
+ReleaseDown() {
+    global
+    lastVertical := -pressingUp, pressingDown := False
+    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
+    SetTimer % "MoveDown" . offDirection, Delete
+    If (pressingUp || lastHorizontal != 0)
+        SetTimer % "Move" . ["", "Up"][pressingUp + 1] . offDirection, 1
+}
+
+ReleaseLeft() {
+    global
+    lastHorizontal := pressingRight, pressingLeft := False
+    offDirection := ["Up", "", "Down"][lastVertical + 2]
+    SetTimer % "Move" . offDirection . "Left", Delete
+    If (pressingRight || lastVertical != 0)
+        SetTimer % "Move" . offDirection . ["", "Right"][pressingRight + 1], 1
+}
+
+ReleaseRight() {
+    global
+    lastHorizontal := -pressingLeft, pressingRight := False
+    offDirection := ["Up", "", "Down"][lastVertical + 2]
+    SetTimer % "Move" . offDirection . "Right", Delete
+    If (pressingLeft || lastVertical != 0)
+        SetTimer % "Move" . offDirection . ["", "Left"][pressingLeft + 1], 1
+}
 
 MoveLeft() {
     If GetKeyState("Ctrl", "P")
