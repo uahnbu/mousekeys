@@ -1,261 +1,190 @@
-pressingUp := False
-pressingDown := False
-pressingLeft := False
-pressingRight := False
-lastHorizontal := 0
-lastVertical := 0
-
-^NumpadClear::Click
-^NumpadIns::Click Down
-^NumpadDel::Click Up
-*NumpadClear::Click
-*NumpadIns::Click Down
-*NumpadDel::Click Up
+stack  := []
+state := []
 
 #If !GetKeyState("NumLock", "T")
-    ^NumpadAdd::Send {LButton}{LButton}
-    ^NumpadSub::RButton
-    ^NumpadDiv::Click WheelUp
-    ^NumpadMult::Click WheelDown
-    *NumpadAdd::Send {LButton}{LButton}
-    *NumpadSub::RButton
-    *NumpadDiv::Click WheelUp
+    ^NumpadAdd::
+    *NumpadAdd:: Send {LButton}{LButton}
+
+    ^NumpadSub::
+    *NumpadSub:: RButton
+
+    ^NumpadMult::
     *NumpadMult::Click WheelDown
+
+    ^NumpadDiv::
+    *NumpadDiv:: Click WheelUp
 #If
 
+^NumpadClear::
+*NumpadClear::Click
+
+^NumpadIns::
+*NumpadIns::  Click Down
+
+^NumpadDel::
+*NumpadDel::  Click Up
+
+~Control::    state[0] := True
+~Control UP:: state[0] := False
+
+; 0    0    0    0    0
+; 0    4    3    2    0
+; 0    1    0   -1    0
+; 0   -2   -3   -4    0
+; 0    0    0    0    0
+
 ^NumpadUp::
-*NumpadUp::
-    PressUp()
-Return
+*NumpadUp::      HandlePress( 3)
 
 ^NumpadDown::
-*NumpadDown::
-    PressDown()
-Return
+*NumpadDown::    HandlePress(-3)
 
 ^NumpadLeft::
-*NumpadLeft::
-    PressLeft()
-Return
+*NumpadLeft::    HandlePress( 1)
 
 ^NumpadRight::
-*NumpadRight::
-    PressRight()
-Return
+*NumpadRight::   HandlePress(-1)
 
 ^NumpadHome::
-*NumpadHome::
-    PressUp()
-    PressLeft()
-Return
+*NumpadHome::    HandlePress( 4)
 
 ^NumpadEnd::
-*NumpadEnd::
-    PressDown()
-    PressLeft()
-Return
+*NumpadEnd::     HandlePress(-2)
 
 ^NumpadPgUp::
-*NumpadPgUp::
-    PressUp()
-    PressRight()
-Return
+*NumpadPgUp::    HandlePress( 2)
 
 ^NumpadPgDn::
-*NumpadPgDn::
-    PressDown()
-    PressRight()
-Return
+*NumpadPgDn::    HandlePress(-4)
 
 ^NumpadUp UP::
-NumpadUp UP::
-    ReleaseUp()
-Return
+NumpadUp UP::    HandleRelease( 3)
 
 ^NumpadDown UP::
-NumpadDown UP::
-    ReleaseDown()
-Return
+NumpadDown UP::  HandleRelease(-3)
 
 ^NumpadLeft UP::
-NumpadLeft UP::
-    ReleaseLeft()
-Return
+NumpadLeft UP::  HandleRelease( 1)
 
 ^NumpadRight UP::
-NumpadRight UP::
-    ReleaseRight()
-Return
+NumpadRight UP:: HandleRelease(-1)
 
 ^NumpadHome UP::
-NumpadHome UP::
-    ReleaseUp()
-    ReleaseLeft()
-Return
+NumpadHome UP::  HandleRelease( 4)
 
 ^NumpadEnd UP::
-NumpadEnd UP::
-    ReleaseDown()
-    ReleaseLeft()
-Return
+NumpadEnd UP::   HandleRelease(-2)
 
 ^NumpadPgUp UP::
-NumpadPgUp UP::
-    ReleaseUp()
-    ReleaseRight()
-Return
+NumpadPgUp UP::  HandleRelease( 2)
 
 ^NumpadPgDn UP::
-NumpadPgDn UP::
-    ReleaseDown()
-    ReleaseRight()
-Return
+NumpadPgDn UP::  HandleRelease(-4)
 
-PressUpLeft() {
-    if (lastHorizontal = -2 && lastVertical = -2)
+HandlePress(dir) {
+    Global stack, state
+    If state[dir + 5]
         Return
-    SetTimer % "Move" . ["Up", "", "Down"][lastVertical + 1] . ["Left", "", "Right"][lastHorizontal + 1], Delete
-    SetTimer MoveUpLeft, 1
-    lastHorizontal := -2, lastVertical := -2
+    key := GetKeyCombination()
+    If key
+        SetMovement(key, False)
+    state[dir + 5] := True
+    stack.Push(dir)
+    SetMovement(GetKeyCombination(), True)
 }
 
-; PressUpRight() {
-;     lastHorizontal := 2, lastVertical := -2
-; }
-
-; PressDownLeft() {
-;     lastHorizontal := -2, lastVertical := 2
-; }
-
-; PressDownRight() {
-;     lastHorizontal := 2, lastVertical := 2
-; }
-
-PressUp() {
-    global
-    If (lastVertical = -1)
-        Return
-    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
-    If (pressingDown || lastHorizontal != 0)
-        SetTimer % "Move" . ["", "Down"][pressingDown + 1] . offDirection, Delete
-    SetTimer % "MoveUp" . offDirection, 1
-    lastVertical := -1, pressingUp := True
+HandleRelease(dir) {
+    Global stack, state
+    SetMovement(GetKeyCombination(), False)
+    state[dir + 5] := False
+    For index, value in stack
+        If (value = dir) {
+            stack.RemoveAt(index)
+            Break
+        }
+    key := GetKeyCombination()
+    If key
+        SetMovement(key, True)
 }
 
-PressDown() {
-    global
-    If (lastVertical = 1)
-        Return
-    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
-    If (pressingUp || lastHorizontal != 0)
-        SetTimer % "Move" . ["", "Up"][pressingUp + 1] . offDirection, Delete
-    SetTimer % "MoveDown" . offDirection, 1
-    lastVertical := 1, pressingDown := True
+GetKeyCombination() {
+    Global stack
+    If !stack.Length()
+        Return 0
+    last := 0
+    Loop % stack.Length() {
+        curr := stack[stack.Length() - A_Index + 1]
+        If !Mod(curr, 2)
+            Return curr
+        If (last && last != -curr)
+            Return last + curr
+        last := curr
+    }
+    Return stack[stack.Length()]
 }
 
-PressLeft() {
-    global
-    If (lastHorizontal = -1)
-        Return
-    offDirection := ["Up", "", "Down"][lastVertical + 2]
-    If (pressingRight || lastVertical != 0)
-        SetTimer % "Move" . offDirection . ["", "Right"][pressingRight + 1], Delete
-    SetTimer % "Move" . offDirection . "Left", 1
-    lastHorizontal := -1, pressingLeft := True
-}
-
-PressRight() {
-    global
-    If (lastHorizontal = 1)
-        Return
-    offDirection := ["Up", "", "Down"][lastVertical + 2]
-    If (pressingLeft || lastVertical != 0)
-        SetTimer % "Move" . offDirection . ["", "Left"][pressingLeft + 1], Delete
-    SetTimer % "Move" . offDirection . "Right", 1
-    lastHorizontal := 1, pressingRight := True
-}
-
-ReleaseUp() {
-    global
-    lastVertical := pressingDown, pressingUp := False
-    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
-    SetTimer % "MoveUp" . offDirection, Delete
-    If (pressingDown || lastHorizontal != 0)
-        SetTimer % "Move" . ["", "Down"][pressingDown + 1] . offDirection, 1
-}
-
-ReleaseDown() {
-    global
-    lastVertical := -pressingUp, pressingDown := False
-    offDirection := ["Left", "", "Right"][lastHorizontal + 2]
-    SetTimer % "MoveDown" . offDirection, Delete
-    If (pressingUp || lastHorizontal != 0)
-        SetTimer % "Move" . ["", "Up"][pressingUp + 1] . offDirection, 1
-}
-
-ReleaseLeft() {
-    global
-    lastHorizontal := pressingRight, pressingLeft := False
-    offDirection := ["Up", "", "Down"][lastVertical + 2]
-    SetTimer % "Move" . offDirection . "Left", Delete
-    If (pressingRight || lastVertical != 0)
-        SetTimer % "Move" . offDirection . ["", "Right"][pressingRight + 1], 1
-}
-
-ReleaseRight() {
-    global
-    lastHorizontal := -pressingLeft, pressingRight := False
-    offDirection := ["Up", "", "Down"][lastVertical + 2]
-    SetTimer % "Move" . offDirection . "Right", Delete
-    If (pressingLeft || lastVertical != 0)
-        SetTimer % "Move" . offDirection . ["", "Left"][pressingLeft + 1], 1
+SetMovement(dir, enabling) {
+    vdir := ["Down", "", "Up"][1 + (dir + 4) // 3]
+    hdir := ["Left", "", "Right"][3 - Mod(dir + 4, 3)]
+    If enabling
+        SetTimer % "Move" . vdir . hdir, 1
+    Else
+        SetTimer % "Move" . vdir . hdir, Delete
 }
 
 MoveLeft() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove -50, 0, 1, R
+    Global state
+    If state[0]
+        MouseMove -50,   0, 1, R
     Else
-        MouseMove -10, 0, 1, R
+        MouseMove -10,   0, 1, R
 }
 MoveRight() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove 50, 0, 1, R
+    Global state
+    If state[0]
+        MouseMove  50,   0, 1, R
     Else
-        MouseMove 10, 0, 1, R
+        MouseMove  10,   0, 1, R
 }
 MoveUp() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove 0, -50, 1, R
+    Global state
+    If state[0]
+        MouseMove   0, -50, 1, R
     Else
-        MouseMove 0, -10, 1, R
+        MouseMove   0, -10, 1, R
 }
 MoveDown() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove 0, 50, 1, R
+    Global state
+    If state[0]
+        MouseMove   0,  50, 1, R
     Else
-        MouseMove 0, 10, 1, R
+        MouseMove   0,  10, 1, R
 }
 MoveUpLeft() {
-    If GetKeyState("Ctrl", "P")
+    Global state
+    If state[0]
         MouseMove -50, -50, 1, R
     Else
         MouseMove -10, -10, 1, R
 }
 MoveUpRight() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove 50, -50, 1, R
+    Global state
+    If state[0]
+        MouseMove  50, -50, 1, R
     Else
-        MouseMove 10, -10, 1, R
+        MouseMove  10, -10, 1, R
 }
 MoveDownLeft() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove -50, 50, 1, R
+    Global state
+    If state[0]
+        MouseMove -50,  50, 1, R
     Else
-        MouseMove -10, 10, 1, R
+        MouseMove -10,  10, 1, R
 }
 MoveDownRight() {
-    If GetKeyState("Ctrl", "P")
-        MouseMove 50, 50, 1, R
+    Global state
+    If state[0]
+        MouseMove  50,  50, 1, R
     Else
-        MouseMove 10, 10, 1, R
+        MouseMove  10,  10, 1, R
 }
