@@ -1,31 +1,50 @@
-stack  := []
-state := []
+SLOW_SPEED := A_ScreenWidth // 320
+FAST_SPEED := A_ScreenWidth // 80
 
-#If !GetKeyState("NumLock", "T")
-    ^NumpadAdd::
-    *NumpadAdd:: Send {LButton}{LButton}
+ctrlKey := False
 
-    ^NumpadSub::
-    *NumpadSub:: RButton
+stack := []
 
-    ^NumpadMult::
-    *NumpadMult::Click WheelDown
+state := [False, False, False, False, False, False, False, False]
 
-    ^NumpadDiv::
-    *NumpadDiv:: Click WheelUp
-#If
+if !GetKeyState("NumLock", "T") {
+    *NumpadAdd::{
+        Send "{LButton}{LButton}"
+    }
 
-^NumpadClear::
-*NumpadClear::Click
+    *NumpadSub::{
+        Send "{RButton}"
+    }
 
-^NumpadIns::
-*NumpadIns::  Click Down
+    *NumpadMult::{
+        Click "WheelDown"
+    }
 
-^NumpadDel::
-*NumpadDel::  Click Up
+    *NumpadDiv::{
+        Click "WheelUp"
+    }
+}
 
-~Control::    state[0] := True
-~Control UP:: state[0] := False
+*NumpadClear::{
+    Click
+}
+
+*NumpadIns::{
+    Click "Down"
+}
+
+*NumpadDel::{
+    Click "Up"
+}
+
+~Control::{
+    global ctrlKey
+    ctrlKey := True
+}
+~Control UP::{
+    global ctrlKey
+    ctrlKey := False
+}
 
 ; 0    0    0    0    0
 ; 0    4    3    2    0
@@ -33,60 +52,76 @@ state := []
 ; 0   -2   -3   -4    0
 ; 0    0    0    0    0
 
-^NumpadUp::
-*NumpadUp::      HandlePress( 3)
+*NumpadUp::{
+    HandlePress( 3)
+}
 
-^NumpadDown::
-*NumpadDown::    HandlePress(-3)
+*NumpadDown::{
+    HandlePress(-3)
+}
 
-^NumpadLeft::
-*NumpadLeft::    HandlePress( 1)
+*NumpadLeft::{
+    HandlePress( 1)
+}
 
-^NumpadRight::
-*NumpadRight::   HandlePress(-1)
+*NumpadRight::{
+    HandlePress(-1)
+}
 
-^NumpadHome::
-*NumpadHome::    HandlePress( 4)
+*NumpadHome::{
+    HandlePress( 4)
+}
 
-^NumpadEnd::
-*NumpadEnd::     HandlePress(-2)
+*NumpadEnd::{
+    HandlePress(-2)
+}
 
-^NumpadPgUp::
-*NumpadPgUp::    HandlePress( 2)
+*NumpadPgUp::{
+    HandlePress( 2)
+}
 
-^NumpadPgDn::
-*NumpadPgDn::    HandlePress(-4)
+*NumpadPgDn::{
+    HandlePress(-4)
+}
 
-^NumpadUp UP::
-NumpadUp UP::    HandleRelease( 3)
+*NumpadUp UP::{
+    HandleRelease( 3)
+}
 
-^NumpadDown UP::
-NumpadDown UP::  HandleRelease(-3)
+*NumpadDown UP::{
+    HandleRelease(-3)
+}
 
-^NumpadLeft UP::
-NumpadLeft UP::  HandleRelease( 1)
+*NumpadLeft UP::{
+    HandleRelease( 1)
+}
 
-^NumpadRight UP::
-NumpadRight UP:: HandleRelease(-1)
+*NumpadRight UP::{
+    HandleRelease(-1)
+}
 
-^NumpadHome UP::
-NumpadHome UP::  HandleRelease( 4)
+*NumpadHome UP::{
+    HandleRelease( 4)
+}
 
-^NumpadEnd UP::
-NumpadEnd UP::   HandleRelease(-2)
+*NumpadEnd UP::{
+    HandleRelease(-2)
+}
 
-^NumpadPgUp UP::
-NumpadPgUp UP::  HandleRelease( 2)
+*NumpadPgUp UP::{
+    HandleRelease( 2)
+}
 
-^NumpadPgDn UP::
-NumpadPgDn UP::  HandleRelease(-4)
+*NumpadPgDn UP::{
+    HandleRelease(-4)
+}
 
 HandlePress(dir) {
-    Global stack, state
-    If state[dir + 5]
-        Return
+    global stack, state
+    if state[dir + 5]
+        return
     key := GetKeyCombination()
-    If key
+    if key
         SetMovement(key, False)
     state[dir + 5] := True
     stack.Push(dir)
@@ -94,97 +129,76 @@ HandlePress(dir) {
 }
 
 HandleRelease(dir) {
-    Global stack, state
+    global stack, state
     SetMovement(GetKeyCombination(), False)
     state[dir + 5] := False
-    For index, value in stack
-        If (value = dir) {
+    for index, value in stack
+        if (value = dir) {
             stack.RemoveAt(index)
-            Break
+            break
         }
     key := GetKeyCombination()
-    If key
+    if key
         SetMovement(key, True)
 }
 
 GetKeyCombination() {
-    Global stack
-    If !stack.Length()
-        Return 0
+    global stack
+    if !stack.Length
+        return 0
     last := 0
-    Loop % stack.Length() {
-        curr := stack[stack.Length() - A_Index + 1]
-        If !Mod(curr, 2)
-            Return curr
-        If (last && last != -curr)
-            Return last + curr
+    Loop stack.Length {
+        curr := stack[stack.Length - A_Index + 1]
+        if !Mod(curr, 2)
+            return curr
+        if (last && last != -curr)
+            return last + curr
         last := curr
     }
-    Return stack[stack.Length()]
+    return stack[stack.Length]
 }
 
 SetMovement(dir, enabling) {
     vdir := ["Down", "", "Up"][1 + (dir + 4) // 3]
     hdir := ["Left", "", "Right"][3 - Mod(dir + 4, 3)]
-    If enabling
-        SetTimer % "Move" . vdir . hdir, 1
-    Else
-        SetTimer % "Move" . vdir . hdir, Delete
+    fn := "Move" . vdir . hdir
+    SetTimer %fn%, +enabling
+}
+
+GetSpeed() {
+    global ctrlKey, SLOW_SPEED, FAST_SPEED
+    return ctrlKey ? SLOW_SPEED : FAST_SPEED
 }
 
 MoveLeft() {
-    Global state
-    If state[0]
-        MouseMove -50,   0, 1, R
-    Else
-        MouseMove -10,   0, 1, R
+    speed := GetSpeed()
+    MouseMove -speed, 0, 1, "R"
 }
 MoveRight() {
-    Global state
-    If state[0]
-        MouseMove  50,   0, 1, R
-    Else
-        MouseMove  10,   0, 1, R
+    speed := GetSpeed()
+    MouseMove  speed, 0, 1, "R"
 }
 MoveUp() {
-    Global state
-    If state[0]
-        MouseMove   0, -50, 1, R
-    Else
-        MouseMove   0, -10, 1, R
+    speed := GetSpeed()
+    MouseMove 0, -speed, 1, "R"
 }
 MoveDown() {
-    Global state
-    If state[0]
-        MouseMove   0,  50, 1, R
-    Else
-        MouseMove   0,  10, 1, R
+    speed := GetSpeed()
+    MouseMove 0,  speed, 1, "R"
 }
 MoveUpLeft() {
-    Global state
-    If state[0]
-        MouseMove -50, -50, 1, R
-    Else
-        MouseMove -10, -10, 1, R
+    speed := GetSpeed()
+    MouseMove -speed, -speed, 1, "R"
 }
 MoveUpRight() {
-    Global state
-    If state[0]
-        MouseMove  50, -50, 1, R
-    Else
-        MouseMove  10, -10, 1, R
+    speed := GetSpeed()
+    MouseMove  speed, -speed, 1, "R"
 }
 MoveDownLeft() {
-    Global state
-    If state[0]
-        MouseMove -50,  50, 1, R
-    Else
-        MouseMove -10,  10, 1, R
+    speed := GetSpeed()
+    MouseMove -speed,  speed, 1, "R"
 }
 MoveDownRight() {
-    Global state
-    If state[0]
-        MouseMove  50,  50, 1, R
-    Else
-        MouseMove  10,  10, 1, R
+    speed := GetSpeed()
+    MouseMove  speed,  speed, 1, "R"
 }
